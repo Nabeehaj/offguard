@@ -63,6 +63,7 @@ async function recordDetection({ sensorId, cocoLabel = 'animal', confidence = nu
     confidence,
     cocoLabel,
     aiVerified: ident.ai,
+    aiModel: ident.aiModel,
     aiError: ident.aiError,
     snapshot: image ? saveSnapshot(id, image) : null,
     source,

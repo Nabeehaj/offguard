@@ -24,13 +24,41 @@ function parseJson(text) {
   return JSON.parse(cleaned);
 }
 
-async function generate(parts) {
-  const res = await ai.models.generateContent({
-    model: config.geminiModel,
-    contents: [{ role: 'user', parts }],
-    config: { responseMimeType: 'application/json', temperature: 0.2 },
+// Busy (503), rate-limited (429) or retired (404) models fall through to the
+// next one, so a demo never stalls on a single model's capacity.
+// Lite first: it answers in ~5 s, which matters for a live alert.
+const MODELS = [...new Set(['gemini-flash-lite-latest', config.geminiModel, 'gemini-flash-latest'])];
+const RETRYABLE = /"code":\s*(503|429|404)|UNAVAILABLE|RESOURCE_EXHAUSTED|NOT_FOUND|timed out/;
+const MODEL_TIMEOUT_MS = 7000;
+
+function withTimeout(promise, ms) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`timed out after ${ms} ms`)), ms);
   });
-  return parseJson(res.text);
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+async function generate(parts) {
+  let lastErr;
+  for (const model of MODELS) {
+    try {
+      const res = await withTimeout(
+        ai.models.generateContent({
+          model,
+          contents: [{ role: 'user', parts }],
+          config: { responseMimeType: 'application/json', temperature: 0.2 },
+        }),
+        MODEL_TIMEOUT_MS
+      );
+      return { ...parseJson(res.text), model };
+    } catch (err) {
+      lastErr = err;
+      if (!RETRYABLE.test(err.message)) throw err;
+      console.warn(`[gemini] ${model} unavailable (${err.message.slice(0, 80)}), trying next model`);
+    }
+  }
+  throw lastErr;
 }
 
 export function fallbackIdentification(cocoLabel) {
@@ -65,6 +93,7 @@ Reply with JSON only:
       count: Math.max(1, Math.round(Number(out.count) || 1)),
       behavior: String(out.behavior || 'near the roadway'),
       aiConfidence: Number(out.confidence) || null,
+      aiModel: out.model,
       ai: true,
     };
   } catch (err) {

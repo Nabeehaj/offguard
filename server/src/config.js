@@ -14,7 +14,7 @@ dotenv.config({ path: path.join(ROOT, '.env') });
 export const config = {
   port: Number(process.env.PORT) || 3001,
   geminiKey: process.env.GEMINI_API_KEY?.trim() || '',
-  geminiModel: process.env.GEMINI_MODEL?.trim() || 'gemini-2.5-flash',
+  geminiModel: process.env.GEMINI_MODEL?.trim() || 'gemini-3.8-flash',
   mqttUrl: process.env.MQTT_URL || 'mqtt://broker.hivemq.com:1883',
   mqttPrefix: process.env.MQTT_PREFIX || 'offguard/og-7k3q9x',
   vapidSubject: process.env.VAPID_SUBJECT || 'mailto:offguard@example.com',
