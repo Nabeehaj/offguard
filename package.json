@@ -1,0 +1,21 @@
+{
+  "name": "offguard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Wildlife crossing alerts for I-495 drivers: camera detection, AI species ID, roadside signs and phone alerts.",
+  "license": "MIT",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,client -c yellow,cyan \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w client",
+    "start": "npm start -w server",
+    "seed": "npm run seed -w server",
+    "fetch-route": "npm run fetch-route -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

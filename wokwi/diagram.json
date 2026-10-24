@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "author": "OffGuard",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-lcd1602", "id": "lcd", "top": -150, "left": 160, "attrs": { "pins": "i2c" } },
+    { "type": "wokwi-led", "id": "lampA", "top": -110, "left": -170, "attrs": { "color": "red", "label": "LAMP A" } },
+    { "type": "wokwi-led", "id": "lampB", "top": -110, "left": -100, "attrs": { "color": "red", "label": "LAMP B" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": -20, "left": -190, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-resistor", "id": "r2", "top": -20, "left": -120, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-buzzer", "id": "bell", "top": 110, "left": -180, "attrs": { "volume": "0.15" } },
+    { "type": "wokwi-servo", "id": "gate", "top": 140, "left": 190, "attrs": {} },
+    { "type": "wokwi-pir-motion-sensor", "id": "pir", "top": -150, "left": -10, "attrs": {} }
+  ],
+  "connections": [
+    ["esp:TX", "$serialMonitor:RX", "", []],
+    ["esp:RX", "$serialMonitor:TX", "", []],
+
+    ["esp:25", "lampA:A", "red", []],
+    ["lampA:C", "r1:1", "black", []],
+    ["r1:2", "esp:GND.1", "black", []],
+
+    ["esp:26", "lampB:A", "red", []],
+    ["lampB:C", "r2:1", "black", []],
+    ["r2:2", "esp:GND.1", "black", []],
+
+    ["esp:27", "bell:2", "orange", []],
+    ["bell:1", "esp:GND.1", "black", []],
+
+    ["esp:18", "gate:PWM", "orange", []],
+    ["gate:V+", "esp:5V", "red", []],
+    ["gate:GND", "esp:GND.2", "black", []],
+
+    ["esp:21", "lcd:SDA", "green", []],
+    ["esp:22", "lcd:SCL", "blue", []],
+    ["lcd:VCC", "esp:5V", "red", []],
+    ["lcd:GND", "esp:GND.2", "black", []],
+
+    ["esp:34", "pir:OUT", "violet", []],
+    ["pir:VCC", "esp:5V", "red", []],
+    ["pir:GND", "esp:GND.3", "black", []]
+  ],
+  "dependencies": {}
+}
