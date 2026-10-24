@@ -23,8 +23,15 @@ export async function currentSubscription() {
 
 /** Ask permission, subscribe this device, and register the commute with the server. */
 export async function subscribeCommute({ fromExit, toExit }) {
-  const permission = await Notification.requestPermission();
-  if (permission !== 'granted') throw new Error('Notifications are blocked. Allow them in your browser settings.');
+  const permission = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+  if (permission !== 'granted') {
+    const ios = /iPhone|iPad/.test(navigator.userAgent);
+    throw new Error(
+      ios
+        ? 'Notifications are off for OffGuard. Open Settings → Notifications → OffGuard and turn on Allow Notifications, then try again.'
+        : 'Notifications are blocked for this site. Tap the icon left of the address bar → Permissions → Notifications → Allow, then reload and try again.'
+    );
+  }
   const reg = await navigator.serviceWorker.ready;
   const { publicKey } = await api.get('/api/push/public-key');
   let sub = await reg.pushManager.getSubscription();
